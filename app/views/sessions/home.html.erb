@@ -1,0 +1,21 @@
+<h2 class='User_Header'><%=@current_user.username%> Home <h2>
+<pre>  <%= ENV['username']  %></pre>
+<pre>  <%= ENV['relationship']  %></pre>
+<pre>  <%= ENV['APIKEY']  %></pre>
+<pre>  <%= ENV['APPDOMAIN'] + ENV['TOKENAPI']  %></pre>
+<script>
+var array = "onboard";
+
+$.ajax({
+        url : "getcontext",
+        type : "post",
+        data : { data_value: JSON.stringify(array) }
+    });
+$.ajax({
+        url : "generatetoken",
+        type : "get",
+    });
+</script>
+
+<pre>  <%= ENV['context']  %></pre>
+<pre>  <%= ENV['token']  %></pre>
