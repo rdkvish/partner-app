@@ -1,0 +1,75 @@
+
+// view/home.html.erb
+var user = {
+    username_or_email: '<%=ENV['username']%>',
+    user_relationship: 'visa'
+    // user_relationship: '<%=ENV['relationship']%>'
+  }
+
+  $.ajax({
+    type: 'put',
+    url: 'updateuser',
+    dataType: 'json',
+    data: user
+  });
+  </script>
+
+
+// Sessions_controller.rb
+
+def updateuser
+	puts "Frontend passed below values:"
+	puts "Username: " + params[:username_or_email]
+	puts "Relationship: " + params[:user_relationship]
+	check_user = User.updaterelationship(params[:username_or_email],params[:user_relationship])
+	head 200, content_type: "text/html"
+end
+
+// Model/user.rb
+
+ActiveRecord::Base.establish_connection(
+  :adapter  => 'sqlite3',
+  :database => './db/merchantnew.sqlite3'
+)
+
+def self.updaterelationship(username_or_email="", user_relationship="")
+    if  EMAIL_REGEX.match(username_or_email)
+      userdb = User.find_by_email(username_or_email)
+    else
+      userdb = User.find_by_username(username_or_email)
+    end
+
+    if userdb == nil
+      puts "User not found: " + username_or_email
+      return false
+    else
+      if userdb.relationship == nil
+        puts "Updating relationship name with :" + user_relationship
+        userdb.relationship = user_relationship
+        userdb.save
+        ENV['relationship'] = user_relationship
+        return true
+      else
+        puts "Relationship name exists, no update required: " + userdb.relationship
+        return false
+      end
+    end
+  end
+
+// Configu/Route.rb
+UserAuth::Application.routes.draw do
+
+  match ':controller(/:action(/:id))(.:format)'
+  root :to => 'sessions#login'
+  match "signup", :to => "users#new"
+  match "login", :to => "sessions#login"
+  match "logout", :to => "sessions#logout"
+  match "home", :to => "sessions#home"
+  match "profile", :to => "sessions#profile"
+  match "setting", :to => "sessions#setting"
+  match "updateuser", :to => "sessions#updateuser"
+  match "getcontext", :to => "sessions#getcontext"
+  match "generatetoken", :to => "sessions#generatetoken"
+end
+
+
